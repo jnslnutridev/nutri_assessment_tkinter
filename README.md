@@ -13,11 +13,6 @@ Este é um sistema interativo e completo para **avaliação nutricional de idoso
 -   📊 Dashboard com gráficos dinâmicos de evolução do peso, macronutrientes e indicadores
 -   📄 Geração de relatórios em PDF (com gráficos e análises integradas)
 
-## 💻 Captura de Tela
-
-> Exemplo do dashboard com indicadores e gráficos:
-> ![exemplo_dashboard](https://via.placeholder.com/800x400?text=Captura+do+Dashboard)
-
 ## 🛠️ Instalação
 
 1. Clone o repositório ou baixe o arquivo `app.py`.
