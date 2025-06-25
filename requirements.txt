@@ -1,0 +1,12 @@
+# --- GUI Interface ---
+# Native Python Tkinter
+
+# --- Data Visualization ---
+matplotlib>=3.10.3 # graphics
+numpy>=2.3.1 # numeric operations
+
+# --- PDF Report ---
+reportlab>=4.4.2
+
+# --- Images Manipulation ---
+Pillow>=11.2.1
