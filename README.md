@@ -35,7 +35,9 @@ pip install -r requirements.txt
 pip install matplotlib numpy reportlab pillow
 ```
 
-4. Execute o sistema:
+4. Crie as pastas pacientes e evoluções na raiz do projeto para receber os arquivos json.
+
+5. Execute o sistema:
 
 ```bash
 python app.py
@@ -44,9 +46,10 @@ python app.py
 ## 📁 Estrutura do Projeto
 
 ```
-app.py                  # Código principal da aplicação
-avaliacao_<nome>.json    # Arquivos salvos com dados do paciente
-relatorio_<nome>.pdf     # Relatórios gerados em PDF
+app.py   # Código principal da aplicação
+\pacientes   # avaliacao_<nome>.json   # Arquivos salvos com dados do paciente
+\evoluções   # evolucao_<nome>_<data e hora>.json   # Arquivos salvos com dados de evolução dos pacientes
+relatorio_<nome>.pdf   # Relatórios gerados em PDF
 ```
 
 ## 📌 Requisitos
