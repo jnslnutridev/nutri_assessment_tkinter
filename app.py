@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import pandas as pd
 import numpy as np
 from datetime import datetime # Caso necessário importar também: timedelta
 import json
@@ -13,7 +12,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-import seaborn as sns
 from PIL import Image as PILImage # Caso necessário importar também: ImageDraw, ImageFont
 import io
 
@@ -45,6 +43,8 @@ class AvaliacaoNutricionalIdosos:
         self.dados_alimentares = {}
         self.historico_consultas = []
         self.dados_intervencao = {}
+        self.dados_evolucao = {}
+
         
         self.setup_interface()
         
@@ -110,6 +110,7 @@ class AvaliacaoNutricionalIdosos:
         self.criar_aba_clinica()
         self.criar_aba_alimentar()
         self.criar_aba_intervencao()
+        self.criar_aba_evolucao()
         self.criar_aba_dashboard()
         self.criar_aba_relatorios()
         
@@ -782,6 +783,95 @@ class AvaliacaoNutricionalIdosos:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
     
+    def criar_aba_evolucao(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text='Evolução Nutricional')
+
+        # Scroll interno (igual às outras abas)
+        canvas = tk.Canvas(frame, bg=self.cores['fundo'])
+        scrollbar = ttk.Scrollbar(frame, orient='vertical', command=canvas.yview)
+        scrollable = tk.Frame(canvas, bg=self.cores['fundo'])
+        scrollable.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        canvas.create_window((0, 0), window=scrollable, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Card
+        card = tk.Frame(scrollable, bg=self.cores['card'], relief='solid', bd=1)
+        card.pack(fill='x', padx=20, pady=20)
+
+        # Título
+        titulo = tk.Frame(card, bg=self.cores['secundaria'], height=40)
+        titulo.pack(fill='x'); titulo.pack_propagate(False)
+        tk.Label(titulo, text="Evolução Nutricional",
+                font=('Arial', 14, 'bold'),
+                bg=self.cores['secundaria'], fg='white').pack(expand=True)
+
+        # Campos
+        campos = [
+            ('Peso (kg):', 'peso_evo'),
+            ('IMC (kg/m²):', 'imc_evo'),
+            ('Estado Nutricional:', 'estado_nutri_evo'),
+            ('Adesão à Dieta:', 'adesao_dieta_evo'),
+            ('Apetite:', 'apetite_evo'),
+            ('Evolução Clínica:', 'evolucao_clinica_evo'),
+            ('Circunferência do Braço (cm):', 'circ_braco_evo'),
+            ('Circunferência Muscular do Braço (cm):', 'circ_musc_braco_evo'),
+            ('Circunferência da Panturrilha (cm):', 'circ_panturrilha_evo'),
+            ('Circunferência da Cintura (cm):', 'circ_cintura_evo'),
+            ('Circunferência do Quadril (cm):', 'circ_quadril_evo'),
+            ('Circunferência Abdominal (cm):', 'circ_abdominal_evo'),
+            ('Dobra Cutânea Tricipital (mm):', 'dobra_triceps_evo'),
+            ('Dobra Cutânea Bicipital (mm):', 'dobra_biceps_evo'),
+            ('Dobra Cutânea Subescapular (mm):', 'dobra_subescapular_evo'),
+            ('Dobra Cutânea Suprailiaca (mm):', 'dobra_suprailiaca_evo'),
+            ('Dobra Cutânea Abdominal (mm):', 'dobra_abdominal_evo'),
+            ('Dobra Cutânea Peitoral (mm):', 'dobra_peitoral_evo'),
+            ('Dobra Cutânea Axilar (mm):', 'dobra_axilar_evo'),
+            ('Avaliador (nome):', 'nome_avaliador_evo')
+        ]
+
+        self.campos_evolucao = {}
+        form = tk.Frame(card, bg=self.cores['card'])
+        form.pack(fill='x', padx=20, pady=20)
+
+        for i, (rotulo, chave) in enumerate(campos):
+            row, col = divmod(i, 2)
+            tk.Label(form, text=rotulo, font=('Arial', 10, 'bold'),
+                    bg=self.cores['card']).grid(row=row, column=col*2,
+                                                sticky='w', padx=5, pady=3)
+            entry = tk.Entry(form, width=25)
+            entry.grid(row=row, column=col*2+1, sticky='w', padx=5, pady=3)
+            self.campos_evolucao[chave] = entry
+
+        # Botões Salvar / Limpar
+        btnf = tk.Frame(card, bg=self.cores['card'])
+        btnf.pack(fill='x', padx=20, pady=(0,20))
+        tk.Button(btnf, text="Salvar Evolução",
+                bg=self.cores['sucesso'], fg='white',
+                font=('Arial', 10, 'bold'),
+                command=self.salvar_evolucao).pack(side='left', padx=10)
+        tk.Button(btnf, text="Limpar Campos",
+                bg=self.cores['alerta'], fg='white',
+                font=('Arial', 10, 'bold'),
+                command=self.limpar_evolucao).pack(side='left')
+
+        # — novos botões —
+        tk.Button(btnf, text="Nova Evolução",
+                bg=self.cores['info'], fg='white',
+                font=('Arial', 10, 'bold'),
+                command=self.nova_evolucao).pack(side='left', padx=5)
+        tk.Button(btnf, text="Carregar Evolução",
+                bg=self.cores['primaria'], fg='white',
+                font=('Arial', 10, 'bold'),
+                command=self.carregar_evolucao).pack(side='left', padx=5)
+
+        canvas.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+
+    
     def criar_aba_dashboard(self):
         self.dashboard_frame = ttk.Frame(self.notebook)
         self.notebook.add(self.dashboard_frame, text='Dashboard')
@@ -1239,6 +1329,37 @@ class AvaliacaoNutricionalIdosos:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao salvar: {e}")
     
+    def salvar_evolucao(self):
+        try:
+            # 1) coleta valores atuais nos campos
+            for chave, widget in self.campos_evolucao.items():
+                valor = widget.get().strip()
+                if valor:
+                    self.dados_evolucao[chave] = valor
+
+            # 2) salva no JSON geral do paciente
+            self.salvar_arquivo()
+
+            # 3) salva num JSON separado
+            evol_dir = os.path.join(os.getcwd(), "evoluções")
+            os.makedirs(evol_dir, exist_ok=True)
+
+            # sugestão de nome: evolucao_<nome>_YYYYMMDD_HHMMSS.json
+            nome = self.dados_paciente.get('nome', 'paciente').replace(' ', '_')
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_name = f"evolucao_{nome}_{ts}.json"
+            fname = os.path.join(evol_dir, f"evolucao_{nome}_{ts}.json")
+
+            with open(fname, 'w', encoding='utf-8') as f:
+                json.dump(self.dados_evolucao, f, ensure_ascii=False, indent=2)
+
+            messagebox.showinfo("Sucesso",
+                f"Evolução salva com sucesso em:\n{fname.split(os.sep)[-2]}/{fname.split(os.sep)[-1]}"
+            )
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao salvar evolução: {e}")
+    
     def salvar_arquivo(self):
         try:
             dados_completos = {
@@ -1247,13 +1368,17 @@ class AvaliacaoNutricionalIdosos:
                 'clinicos': self.dados_clinicos,
                 'alimentares': self.dados_alimentares,
                 'intervencao': self.dados_intervencao,
+                'evolucao': self.dados_evolucao,
                 'historico': self.historico_consultas,
                 'ultima_atualizacao': datetime.now().isoformat()
             }
             
-            nome_arquivo = f"avaliacao_{self.dados_paciente.get('nome', 'paciente').replace(' ', '_')}.json"
-            
-            with open(nome_arquivo, 'w', encoding='utf-8') as f:
+            nome_arquivo = f"avaliacao_{self.dados_paciente.get('nome', 'paciente').replace(' ', '_')}"
+            pacientes_dir = os.path.join(os.getcwd(), "pacientes")
+            os.makedirs(pacientes_dir, exist_ok=True)
+
+            file_path = os.path.join(pacientes_dir, f"{nome_arquivo}.json")
+            with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(dados_completos, f, ensure_ascii=False, indent=2)
                 
         except Exception as e:
@@ -1309,6 +1434,38 @@ class AvaliacaoNutricionalIdosos:
         self.suplemento_text.delete(1.0, tk.END)
         self.recomendacoes_text.delete(1.0, tk.END)
         # self.dados_intervencao.clear()
+    
+    def limpar_evolucao(self):
+        for widget in self.campos_evolucao.values():
+            widget.delete(0, tk.END)
+        # self.dados_evolucao.clear()  # se quiser também esvaziar o dicionário
+    
+    # Adicionar ou carregar uma evolução nutricional
+    def nova_evolucao(self):
+        """Reseta a tela para cadastrar uma nova evolução."""
+        self.dados_evolucao = {}
+        self.limpar_evolucao()
+
+    def carregar_evolucao(self):
+        """Carrega um .json de evolução previamente salvo e preenche os campos."""
+        path = filedialog.askopenfilename(
+            title="Selecione arquivo de evolução",
+            filetypes=[("JSON", "*.json")]
+        )
+        if not path:
+            return
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            self.dados_evolucao = data
+            # preenche cada campo
+            for chave, entry in self.campos_evolucao.items():
+                entry.delete(0, tk.END)
+                if chave in data:
+                    entry.insert(0, data[chave])
+            messagebox.showinfo("Sucesso", "Evolução carregada!")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Não foi possível carregar: {e}")
     
     # Métodos do dashboard
     def atualizar_dashboard(self, event=None):
@@ -1536,6 +1693,44 @@ class AvaliacaoNutricionalIdosos:
             story.append(Paragraph(f"<b>Recomendações:</b> {interven.get('recomendacoes', '')}", styles['Normal']))
             story.append(Spacer(1, 12))
 
+        # Seção: Evolução Nutricional
+        if self.dados_evolucao:
+            story.append(Paragraph("EVOLUÇÃO NUTRICIONAL", styles['Heading2']))
+            evo_table = []
+            for rotulo, chave in [
+                ("Peso (kg):", 'peso_evo'),
+                ("IMC (kg/m²):", 'imc_evo'),
+                ('Estado Nutricional:', 'estado_nutri_evo'),
+                ('Adesão à Dieta:', 'adesao_dieta_evo'),
+                ('Apetite:', 'apetite_evo'),
+                ('Evolução Clínica:', 'evolucao_clinica_evo'),
+                ('Circunferência do Braço (cm):', 'circ_braco_evo'),
+                ('Circunferência Muscular do Braço (cm):', 'circ_musc_braco_evo'),
+                ('Circunferência da Panturrilha (cm):', 'circ_panturrilha_evo'),
+                ('Circunferência da Cintura (cm):', 'circ_cintura_evo'),
+                ('Circunferência do Quadril (cm):', 'circ_quadril_evo'),
+                ('Circunferência Abdominal (cm):', 'circ_abdominal_evo'),
+                ('Dobra Cutânea Tricipital (mm):', 'dobra_triceps_evo'),
+                ('Dobra Cutânea Bicipital (mm):', 'dobra_biceps_evo'),
+                ('Dobra Cutânea Subescapular (mm):', 'dobra_subescapular_evo'),
+                ('Dobra Cutânea Suprailiaca (mm):', 'dobra_suprailiaca_evo'),
+                ('Dobra Cutânea Abdominal (mm):', 'dobra_abdominal_evo'),
+                ('Dobra Cutânea Peitoral (mm):', 'dobra_peitoral_evo'),
+                ('Dobra Cutânea Axilar (mm):', 'dobra_axilar_evo'),
+                ("Avaliador:", 'nome_avaliador_evo')
+            ]:
+                evo_table.append([rotulo, self.dados_evolucao.get(chave, '')])
+            table_evo = Table(evo_table, colWidths=[3*inch, 4*inch], hAlign='LEFT')
+            table_evo.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (0,-1), colors.lightgrey),
+                ('BOX', (0,0), (-1,-1), 1, colors.black),
+                ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
+            ]))
+            story.append(table_evo)
+            story.append(Spacer(1, 12))
+        
         # --- Nova seção: Dashboard Nutricional ---
         story.append(Paragraph("DASHBOARD NUTRICIONAL", styles['Heading2']))
         story.append(Spacer(1, 12))
@@ -1609,6 +1804,7 @@ class AvaliacaoNutricionalIdosos:
             self.dados_clinicos       = dados.get('clinicos', {})
             self.dados_alimentares    = dados.get('alimentares', {})
             self.dados_intervencao    = dados.get('intervencao', {})
+            self.dados_evolucao    = dados.get('evolucao', {})
             self.historico_consultas  = dados.get('historico', [])
 
             # Preenche aba Identificação
@@ -1668,6 +1864,12 @@ class AvaliacaoNutricionalIdosos:
             self.suplemento_text.insert(tk.END, self.dados_intervencao.get('suplementacao', ''))
             self.recomendacoes_text.delete(1.0, tk.END)
             self.recomendacoes_text.insert(tk.END, self.dados_intervencao.get('recomendacoes', ''))
+
+            # Preenche aba Evolução
+            for chave, entry in self.campos_evolucao.items():
+                valor = self.dados_evolucao.get(chave, '')
+                entry.delete(0, tk.END)
+                entry.insert(0, valor)
 
             # Atualiza dashboard
             self.atualizar_dashboard()
